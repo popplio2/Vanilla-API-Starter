@@ -1,27 +1,32 @@
 import { DOMSelectors } from "./DOM";
 import { genres } from "./genre";
-
 const key = "73e396357001f6d2f7ae92f73e5a8c1e";
-
-const query = async function() {
-    try {
+const listen = function () {
+  DOMSelectors.searchForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    DOMSelectors.grid.innerHTML = "";
+    const searchParams = DOMSelectors.searchArea.value;
+    const searchQuery = async function () {
+      try {
         const response = await fetch(
-        `https://api.themoviedb.org/3/discover/movie?api_key=${key}&language=en-US&sort_by=vote_average.desc&include_adult=false&include_video=false&page=1&vote_count.gte=4000&vote_average.gte=8&with_watch_monetization_types=flatrate`
+          `https://api.themoviedb.org/3/search/movie?api_key=${key}&language=en-US&query=${searchParams}&page=1&include_adult=false`
         );
         const data = await response.json();
         data.results.forEach((movie) => {
-            let genreArr = [];
-            const addGenre = function () {
-                genres.forEach((element) => {
-                    if (movie.genre_ids.includes(element.id)) {
-                        genreArr.push(element.name);
-                        return genreArr;
-                    }
-                });
-            };
-            addGenre();
-            console.log(genreArr);
-            DOMSelectors.grid.insertAdjacentHTML("beforeend", `<div class="movie-card">
+          let genreArr = [];
+          const addGenre = function () {
+            genres.forEach((element) => {
+              if (movie.genre_ids.includes(element.id)) {
+                genreArr.push(element.name);
+                return genreArr;
+              }
+            });
+          };
+          addGenre();
+
+          DOMSelectors.grid.insertAdjacentHTML(
+            "beforeend",
+            `<div class="movie-card">
             <div class="movie-card-front">
               <img
                 src="https://image.tmdb.org/t/p/w300/${movie.poster_path}"
@@ -35,21 +40,26 @@ const query = async function() {
                 <p class="user-score">Community Score</p>
                 <p class="user-score">${movie.vote_average}</p>
               </div>
-    
+      
               <div class="release-box">
                 <p class="release-date">Released</p>
                 <p class="release-date">${movie.release_date}</p>
               </div>
-    
+      
               <div class="movie-genres">
-                 ${genreArr}
+                ${genreArr}
               </div>
             </div>
-          </div>`)
-        })
-    } catch (error) {
+          </div>`
+          );
+        });
+      } catch (error) {
         console.log(error);
-        alert("Something went wrong.")
-    }
-}
-query();
+        alert("Hey something went wrong");
+      }
+    };
+    searchQuery();
+  });
+};
+
+listen();
